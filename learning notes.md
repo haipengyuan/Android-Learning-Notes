@@ -48,3 +48,58 @@ observable.subscribeOn(Schedulers.io())  // 在IO线程请求网络
         }
     });
 ```
+
+
+### AsyncTask
+
+```Java
+/**
+ * 参数1 Params：执行AsyncTask时要传入的参数，可用于在后台任务中使用
+ * 参数2 Progress：进度单位
+ * 参数3 Result：返回值类型
+ */
+class DownloadTask extends AsyncTask<Void, Integer, Boolean> {
+    @Override
+    protected void onPreExecute() {
+        // 界面的初始化操作
+        progressDialog.show();
+    }
+    
+    @Override
+    protected Boolean doInBackground(Void... params) {
+        // 在子线程中执行，处理耗时操作
+	try {
+	    while (true) {
+	        int downloadPercent = doDownload();
+		
+		// 反馈当前任务的执行进度
+		publishProgres(downloadPercent);
+		
+		if (downloadPercent >= 100) {
+		    break;
+		}
+	    }
+	} catch (Exception e) {
+	    return false;
+	}
+	return true;
+    }
+    
+    @Override
+    protected void onProgressUpdate(Integer... values) {
+        // 更新UI
+	progressDialog.setMessage("Download " + values[0] + "%");
+    }
+    
+    @Override
+    protected void onPostExecute(Boolean result) {
+        // 后台任务return后执行
+        progressDialog.dismiss();
+	if (result) {
+	    Toast.makeText(context, "Download Success", Toast.LENGTH_SHORT).show();
+	} else {
+	    Toast.makeText(context, "Download Failed", Toast.LENGTH_SHORT).show();
+	}
+    }
+}
+```

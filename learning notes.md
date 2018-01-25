@@ -1,4 +1,4 @@
-### Retrofit结合RxJava
+## Retrofit结合RxJava
 
 ```Java
 // 创建接口
@@ -50,7 +50,7 @@ observable.subscribeOn(Schedulers.io())  // 在IO线程请求网络
 ```
 
 
-### AsyncTask
+## AsyncTask
 
 ```Java
 /**
@@ -103,3 +103,58 @@ class DownloadTask extends AsyncTask<Void, Integer, Boolean> {
     }
 }
 ```
+
+
+## 调用系统相机
+
+```Java
+static final int REQUEST_IMAGE_CAPTURE = 1;
+private void dispatchTakePictureIntent() {
+    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+    
+    /**
+     * resolveActivity()方法会返回能处理该Intent的第一个Activity
+     * 用来检查有没有能处理这个Intent的Activity
+     */
+    if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+    }
+}
+```
+```Java
+/**
+ * 获取照片的缩略图
+ * 缩略图适用于作为图标
+ */
+@Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+        Bundle extras = data.getExtras();
+        Bitmap imageBitmap = (Bitmap) extras.get("data");
+        mImageView.setImageBitmap(imageBitmap);
+    }
+}
+```
+#### 保存全尺寸照片
+```Java
+String mCurrentPhotoPath;
+private File createImageFile() throws IOException {
+    // 创建文件名
+    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+    String imageFileName = "JPEG_" + timeStamp + "_";
+    // 获取适用于存储公共图片的目录，可被所有应用共享
+    File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+    File image = File.createTempFile(
+        imageFileName,      /* prefix */
+        ".jpg",             /* suffix */
+        storageDir          /* directory */
+    );
+    
+    mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+    return image;
+}
+```
+
+
+
+

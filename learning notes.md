@@ -154,7 +154,43 @@ private File createImageFile() throws IOException {
     return image;
 }
 ```
-
-
-
+```Java
+static final int REQUEST_TAKE_PHOTO = 1;
+private void dispatchTakePictureIntent() {
+    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+    
+    if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+        File photoFile = null;
+        try {
+            photoFile = createImageFile();
+        } catch (IOException e) {}
+        
+        if (photoFile != null) {
+            takePictureClient.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
+            startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+        }
+    }
+}
+```
+#### 压缩图片
+```Java
+private void setPic() {
+    int targetW = mImageView.getWidth();
+    int targetH = mImageView.getHeight();
+    
+    BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+    bmOptions.inJustDecodeBounds = true;
+    BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+    int photoW = bmOptions.outWidth;
+    int photoH = bmOptions.outHeight;
+    
+    int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+    
+    bmOptions.inJustDecodeBounds = false;
+    bmOptions.imSampleSize = scaleFactor;
+    bmOptions.inPurgeable = true;
+    Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+    mImageView.setImageBitmap(bitmap);
+}
+```
 

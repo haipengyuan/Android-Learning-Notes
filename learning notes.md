@@ -212,3 +212,63 @@ public static int calculateInSampleSize(BitmapFactory.Options options, int reqWi
     return inSampleSize;
 }
 ```
+## 十六进制字符串与字节数组之间的转换
+```Java
+/**
+ * 数组转字符串
+ * {0xF0, 0x08} -> "F008"
+ */
+public static String bytesToHexString(byte[] bytes) {
+    StringBuilder sb = new StringBuilder();
+    for (byte value : bytes) {
+        int v = value & 0xFF;
+        String str = Integer.toHexString(v);
+        if (str.length() < 2) {
+            sb.append("0");
+        }
+        sb.append(str);
+    }
+
+    return sb.toString();
+}
+```
+```Java
+/*
+ * 字符串转数组
+ */
+public static byte[] hexStringToBytes(String hexString) {
+    hexString = hexString.toUpperCase();
+    char[] charArray = hexString.toCharArray();
+    int length;
+    byte[] bytes;
+
+    if (hexString.length() % 2 == 0) {
+        length = hexString.length() / 2;
+        bytes = new byte[length];
+        bytes[0] = (byte) (charToByte(charArray[0]) << 4 | charToByte(charArray[1]));
+
+        for (int i = 1; i < length; i++) {
+            int pos = i * 2;
+            bytes[i] = (byte) (charToByte(charArray[pos]) << 4 | charToByte(charArray[pos + 1]));
+        }
+    } else {
+        length = hexString.length() / 2 + 1;
+        bytes = new byte[length];
+        bytes[0] = (byte) charToByte(charArray[0]);
+
+        for (int i = 1; i < length; i++) {
+            int pos = i * 2 - 1;
+            bytes[i] = (byte) (charToByte(charArray[pos]) << 4 | charToByte(charArray[pos + 1]));
+        }
+    }
+
+    return bytes;
+} 
+
+private static byte charToByte(char c) {
+    return (byte) "0123456789ABCDEF".indexOf(c);
+}
+```
+
+
+

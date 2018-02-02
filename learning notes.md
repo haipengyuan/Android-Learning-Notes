@@ -341,12 +341,14 @@ public class DeviceScanActivity extends ListActivity {
                 @Override
                 public void run() {
                     mScanning = false;
-                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                    // 停止扫描
+                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
                 }
             }, SCAN_PERIOD);
 
-            mScanning = true
-            mBluetoothAdapter.startLeScan(mLeScanCallback);
+            mScanning = true;            
+            // 开启扫描
+            mBluetoothAdapter.startLeScan(mLeScanCallback);
         } else {
             mScanning = false;
             mBluetoothAdapter.stopLeScan(mLeScanCallback);
@@ -382,6 +384,7 @@ private BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.L
  */
 BluetoothGatt mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
 ```
+创建一个Service用来和BLE设备进行交互，创建BluetoothGattCallback实例并重写内部方法来传递返回结果
 ```java
 public class BluetoothLeService extends Service {
     private static final String TAG = BluetoothLeService.class.getSimpleName();
@@ -418,11 +421,15 @@ public class BluetoothLeService extends Service {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 intentAction = ACTION_GATT_CONNECTED;
                 mConnectionState = STATE_CONNECTED;
-                broadcastUpdate(intentAction);
+                
+                // 发送广播到UI线程进行相应处理
+                broadcastUpdate(intentAction);
                 Log.i(TAG, "Connected to GATT server.");
-                Log.i(TAG, "Attempting to start service discovery:" + 
+                
+                // 搜索Service
+                Log.i(TAG, "Attempting to start service discovery:" + 
                         mBluetoothGatt.discoverServices());
-            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {         // 连接断开                   
                 intentAction = ACTION_GATT_DISCONNECTED;
                 mConnectionState = STATE_DISCONNECTED;
                 Log.i(TAG, "Disconnected from GATT server.");
@@ -448,71 +455,36 @@ public class BluetoothLeService extends Service {
         }
 }
 ```
+
+### 接收BLE Notifications
 ```java
-private void broadcastUpdate(final String action) {
-    final Intent intent = new Intent(action);
-    sendBroadcast(intent);
-}
-
-private void broadcastUpdate(final String action, final BluetoothGattCharacteristic characteristic) {
-    final Intent intent = new Intent(action);
-
-    // This is special handling for the Heart Rate Measurement profile. Data
-    // parsing is carried out as per profile specifications.
-    if (UUID_HEART_RATE_MEASUREMENT.equals(characteristic.getUuid())) {
-        int flag = characteristic.getProperties();
-        int format = -1;
-        if ((flag & 0x01) != 0) {
-            format = BluetoothGattCharacteristic.FORMAT_UINT16;
-            Log.d(TAG, "Heart rate format UINT16.");
-        } else {
-            format = BluetoothGattCharacteristic.FORMAT_UINT8;
-            Log.d(TAG, "Heart rate format UINT8.");
-        }
-        final int heartRate = characteristic.getIntValue(format, 1);
-        Log.d(TAG, String.format("Received heart rate: %d", heartRate));
-        intent.putExtra(EXTRA_DATA, String.valueOf(heartRate));
-    } else {
-        // For all other profiles, writes the data formatted in HEX.
-        final byte[] data = characteristic.getValue();
-        if (data != null && data.length > 0) {
-            final StringBuilder stringBuilder = new StringBuilder(data.length);
-            for(byte byteChar : data) {
-	    	stringBuilder.append(String.format("%02X ", byteChar));
-	    }
-            intent.putExtra(EXTRA_DATA, new String(data) + "\n" + stringBuilder.toString());
-        }
-    }
-    sendBroadcast(intent);
+private BluetoothGatt mBluetoothGatt;
+BluetoothGattCharacteristic characteristic;
+boolean enabled;
+...
+mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
+...
+BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
+        UUID.fromString(SampleGattAttributes.CLIENT_CHARACTERISTIC_CONFIG));
+descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+mBluetoothGatt.writeDescriptor(descriptor);
+```
+当characteristic发生变化时将会触发onCharacteristicChanged()回调方法
+```java
+@Override
+// Characteristic notification
+public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+    broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
 }
 ```
+
+### 关闭
 ```java
-// Handles various events fired by the Service.
-// ACTION_GATT_CONNECTED: connected to a GATT server.
-// ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
-// ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
-// ACTION_DATA_AVAILABLE: received data from the device. This can be a
-// result of read or notification operations.
-private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        final String action = intent.getAction();
-        if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
-            mConnected = true;
-            updateConnectionState(R.string.connected);
-            invalidateOptionsMenu();
-        } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
-            mConnected = false;
-            updateConnectionState(R.string.disconnected);
-            invalidateOptionsMenu();
-            clearUI();
-        } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
-            // Show all the supported services and characteristics on the
-            // user interface.
-            displayGattServices(mBluetoothLeService.getSupportedGattServices());
-        } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
-            displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
-        }
+public void close() {
+    if (mBluetoothGatt == null) {
+        return;
     }
-};
+    mBluetoothGatt.close();
+    mBluetoothGatt = null;
+}
 ```

@@ -136,7 +136,7 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 }
 ```
 
-#### 保存全尺寸照片
+### 保存全尺寸照片
 ```Java
 String mCurrentPhotoPath;
 private File createImageFile() throws IOException {
@@ -174,7 +174,7 @@ private void dispatchTakePictureIntent() {
 }
 ```
 
-#### 压缩图片
+### 压缩图片
 ```Java
 private void setPic() {
     int targetW = mImageView.getWidth();
@@ -196,7 +196,7 @@ private void setPic() {
 }
 ```
 
-#### 计算缩放比例
+### 计算缩放比例
 ```Java
 public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
     final int height = options.outHeight;
@@ -279,7 +279,7 @@ private static byte charToByte(char c) {
 
 ## Bluetooth Low Energy 低功耗蓝牙
 
-#### BLE权限
+### BLE权限
 ```xml
 <uses-permission android:name="android.permission.BLUETOOTH"/>
 <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
@@ -288,7 +288,7 @@ private static byte charToByte(char c) {
 ```xml
 <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
 ```
-如果想让应用可适用于不支持BLE功能的设备，设置[required="false"]()，并在程序运行时判断设备是否支持BLE，有选择性地禁用BLE相关的功能。
+如果想让应用可适用于不支持BLE功能的设备，设置`required="false"`，并在程序运行时判断设备是否支持BLE，有选择性地禁用BLE相关的功能。
 ```java
 if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
     Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
@@ -296,7 +296,7 @@ if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) 
 }
 ```
 
-#### 获得BluetoothAdapter
+### 获得BluetoothAdapter
 ```java
 private BluetoothAdapter mBluetoothAdapter;
 
@@ -305,7 +305,7 @@ final BluetoothManager bluetoothManager =
 mBluetoothAdapter = bluetoothManager.getAdapter();
 ```
 
-#### 开启蓝牙
+### 开启蓝牙
 ```java
 /**
  * 如果蓝牙未开启，显示对话框请求开启蓝牙
@@ -317,7 +317,7 @@ if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
 }
 ```
 
-#### 扫描BLE设备
+### 扫描BLE设备
 由于扫描过程耗费电池电量：
 * 找到所需设备后立即停止扫描
 * 为扫描过程设定时间限制，不要一直扫描
@@ -354,7 +354,7 @@ public class DeviceScanActivity extends ListActivity {
     }
 }
 ```
-> 如果只扫描指定类型的设备，调用startLeScan(UUID[], BluetoothAdapter.LeScanCallback)方法。
+> 如果只扫描指定类型的设备，调用`startLeScan(UUID[], BluetoothAdapter.LeScanCallback)`方法。
 
 实现BluetoothAdapter.LeScanCallback接口，接收扫描结果：
 ```java
@@ -373,7 +373,7 @@ private BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.L
 };
 ```
 
-#### 连接GATT SERVER
+### 连接GATT SERVER
 ```java
 /*
  * 参数1：Context
@@ -386,7 +386,7 @@ BluetoothGatt mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
 public class BluetoothLeService extends Service {
     private static final String TAG = BluetoothLeService.class.getSimpleName();
 	
-	private BluetoothManager mBluetoothManager;
+    private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
     private String mBluetoothDeviceAddress;
     private BluetoothGatt mBluetoothGatt;
@@ -409,9 +409,9 @@ public class BluetoothLeService extends Service {
     public final static UUID UUID_HEART_RATE_MEASUREMENT = 
             UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
 
-	private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
+    private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
     
-	    @Override
+        @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             String intentAction;
             // 连接成功
@@ -430,7 +430,7 @@ public class BluetoothLeService extends Service {
             }
         }
 
-		@Override
+        @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
@@ -439,7 +439,7 @@ public class BluetoothLeService extends Service {
             }
         }
 
-		@Override
+        @Override
         public void onCharacteristicRead(BluetoothGatt gatt, 
                 BluetoothGattCharacteristic characteristic, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {

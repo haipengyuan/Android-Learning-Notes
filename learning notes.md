@@ -288,7 +288,7 @@ private static byte charToByte(char c) {
 ```xml
 <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
 ```
-如果想让应用可适用于不支持BLE功能的设备，设置**required="false"**，并在程序运行时判断设备是否支持BLE，有选择性地禁用BLE相关的功能。
+如果想让应用可适用于不支持BLE功能的设备，设置[required="false"]()，并在程序运行时判断设备是否支持BLE，有选择性地禁用BLE相关的功能。
 ```java
 if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
     Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
@@ -300,7 +300,8 @@ if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) 
 ```java
 private BluetoothAdapter mBluetoothAdapter;
 
-final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+final BluetoothManager bluetoothManager = 
+        (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
 mBluetoothAdapter = bluetoothManager.getAdapter();
 ```
 
@@ -350,28 +351,25 @@ public class DeviceScanActivity extends ListActivity {
             mScanning = false;
             mBluetoothAdapter.stopLeScan(mLeScanCallback);
         }
-
     }
 }
 ```
-> 如果只扫描指定类型的设备，调用**startLeScan(UUID[], BluetoothAdapter.LeScanCallback)**方法。
+> 如果只扫描指定类型的设备，调用startLeScan(UUID[], BluetoothAdapter.LeScanCallback)方法。
 
 实现BluetoothAdapter.LeScanCallback接口，接收扫描结果：
 ```java
 private LeDeviceListAdapter mLeDeviceListAdapter;
-private BluetoothAdapter.LeScanCallback mLeScanCallback =
-        new BluetoothAdapter.LeScanCallback() {
+private BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
     @Override
-    public void onLeScan(final BluetoothDevice device, int rssi,
-            byte[] scanRecord) {
+    public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
         runOnUiThread(new Runnable() {
-           @Override
-           public void run() {
-               mLeDeviceListAdapter.addDevice(device);
-               mLeDeviceListAdapter.notifyDataSetChanged();
-           }
-       });
-   }
+            @Override
+            public void run() {
+                mLeDeviceListAdapter.addDevice(device);
+                mLeDeviceListAdapter.notifyDataSetChanged();
+            }
+        });
+    }
 };
 ```
 
@@ -386,7 +384,7 @@ BluetoothGatt mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
 ```
 ```java
 public class BluetoothLeService extends Service {
-	private static final String TAG = BluetoothLeService.class.getSimpleName();
+    private static final String TAG = BluetoothLeService.class.getSimpleName();
 	
 	private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
@@ -398,25 +396,23 @@ public class BluetoothLeService extends Service {
     private static final int STATE_CONNECTING = 1;
     private static final int STATE_CONNECTED = 2;
 
-    public final static String ACTION_GATT_CONNECTED =
+    public final static String ACTION_GATT_CONNECTED = 
             "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
-    public final static String ACTION_GATT_DISCONNECTED =
+    public final static String ACTION_GATT_DISCONNECTED = 
             "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
-    public final static String ACTION_GATT_SERVICES_DISCOVERED =
+    public final static String ACTION_GATT_SERVICES_DISCOVERED = 
             "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
-    public final static String ACTION_DATA_AVAILABLE =
+    public final static String ACTION_DATA_AVAILABLE = 
             "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
-    public final static String EXTRA_DATA =
-            "com.example.bluetooth.le.EXTRA_DATA";
+    public final static String EXTRA_DATA = "com.example.bluetooth.le.EXTRA_DATA";
 
-    public final static UUID UUID_HEART_RATE_MEASUREMENT =
+    public final static UUID UUID_HEART_RATE_MEASUREMENT = 
             UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
 
-	private final BluetoothGattCallback mGattCallback =
-            new BluetoothGattCallback() {
+	private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
+    
 	    @Override
-        public void onConnectionStateChange(BluetoothGatt gatt, int status,
-                int newState) {
+        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             String intentAction;
             // 连接成功
             if (newState == BluetoothProfile.STATE_CONNECTED) {
@@ -424,9 +420,8 @@ public class BluetoothLeService extends Service {
                 mConnectionState = STATE_CONNECTED;
                 broadcastUpdate(intentAction);
                 Log.i(TAG, "Connected to GATT server.");
-                Log.i(TAG, "Attempting to start service discovery:" +
+                Log.i(TAG, "Attempting to start service discovery:" + 
                         mBluetoothGatt.discoverServices());
-
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 intentAction = ACTION_GATT_DISCONNECTED;
                 mConnectionState = STATE_DISCONNECTED;
@@ -445,9 +440,8 @@ public class BluetoothLeService extends Service {
         }
 
 		@Override
-        public void onCharacteristicRead(BluetoothGatt gatt,
-                BluetoothGattCharacteristic characteristic,
-                int status) {
+        public void onCharacteristicRead(BluetoothGatt gatt, 
+                BluetoothGattCharacteristic characteristic, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
             }
@@ -460,8 +454,7 @@ private void broadcastUpdate(final String action) {
     sendBroadcast(intent);
 }
 
-private void broadcastUpdate(final String action,
-                             final BluetoothGattCharacteristic characteristic) {
+private void broadcastUpdate(final String action, final BluetoothGattCharacteristic characteristic) {
     final Intent intent = new Intent(action);
 
     // This is special handling for the Heart Rate Measurement profile. Data
@@ -484,10 +477,10 @@ private void broadcastUpdate(final String action,
         final byte[] data = characteristic.getValue();
         if (data != null && data.length > 0) {
             final StringBuilder stringBuilder = new StringBuilder(data.length);
-            for(byte byteChar : data)
-                stringBuilder.append(String.format("%02X ", byteChar));
-            intent.putExtra(EXTRA_DATA, new String(data) + "\n" +
-                    stringBuilder.toString());
+            for(byte byteChar : data) {
+	    	stringBuilder.append(String.format("%02X ", byteChar));
+	    }
+            intent.putExtra(EXTRA_DATA, new String(data) + "\n" + stringBuilder.toString());
         }
     }
     sendBroadcast(intent);
@@ -513,8 +506,7 @@ private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
             updateConnectionState(R.string.disconnected);
             invalidateOptionsMenu();
             clearUI();
-        } else if (BluetoothLeService.
-                ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
+        } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
             // Show all the supported services and characteristics on the
             // user interface.
             displayGattServices(mBluetoothLeService.getSupportedGattServices());

@@ -488,3 +488,133 @@ public void close() {
     mBluetoothGatt = null;
 }
 ```
+
+
+## BottomNavigationView 底部导航栏
+BottomNavigationView为谷歌官方导航控件，可结合ViewPager实现底部导航功能
+```xml
+<android.support.design.widget.BottomNavigationView
+    android:id="@+id/bottom_navigation_view"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:background="@android:color/white"
+    app:itemTextColor="@drawable/selector_bottom_navigation"
+    app:itemIconTint="@drawable/selector_bottom_navigation"
+    app:elevation="@dimen/bottom_navigation_view_elevation"
+    app:menu="@menu/menu_bottom_nav_view" />
+
+<android.support.v4.view.ViewPager
+    android:id="@+id/view_pager_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+```
+在res目录下的menu文件夹下创建 menu_bottom_nav_view.xml，添加所需的菜单项，设置图标和文字
+```xml
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menu_item_hot_topic"
+        android:icon="@drawable/ic_topic"
+        android:title="@string/hot_topic"/>
+    <item android:id="@+id/menu_item_news"
+        android:icon="@drawable/ic_news"
+        android:title="@string/news"/>
+    <item android:id="@+id/menu_item_tech_news"
+        android:icon="@drawable/ic_code"
+        android:title="@string/developer_news"/>
+    <item android:id="@+id/menu_item_more"
+        android:icon="@drawable/ic_more"
+        android:title="@string/more"/>
+</menu>
+```
+在res目录下的drawable文件夹下创建 selector_bottom_navigation.xml，设置导航菜单在选中和未选中状态下的效果
+```xml
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/nav_checked" android:state_checked="true" />
+    <item android:color="@color/nav_unchecked" android:state_checked="false" />
+</selector>
+```
+在Activity中对控件进行初始化并添加监听事件等
+```Java
+BottomNavigationView mBottomNavigationView = 
+        (BottomNavigationView) findViewById(R.id.bottom_navigation_view);
+ViewPager mViewPager = (ViewPager) findViewById(R.id.view_pager_main);
+
+// 为BottomNavigationView控件添加事件监听
+mBottomNavigationView.setOnNavigationItemSelectedListener(
+        new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int currentItem = 0;
+                switch (item.getItemId()) {
+                    case R.id.menu_item_hot_topic:
+                        currentItem = 0;
+                        break;
+                    case R.id.menu_item_news:
+                        currentItem = 1;
+                        break;
+                    case R.id.menu_item_tech_news:
+                        currentItem = 2;
+                        break;
+                    case R.id.menu_item_more:
+                        currentItem = 3;
+                        break;
+                }
+
+                // 当前显示页面为导航栏点击位置对应页面
+                if (mViewPager.getCurrentItem() == currentItem) {
+                    // TODO 刷新页面或者回到顶部
+                } else {
+                    // ViewPager跟随BottomNavigationView进行页面切换
+                    mViewPager.setCurrentItem(currentItem);
+                }
+                return true;
+            }
+        });
+
+// 为ViewPager添加事件监听
+mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
+
+    @Override
+    public void onPageSelected(int position) {
+        // BottomNavigationView跟随ViewPager滑动切换选中菜单项
+        mBottomNavigationView.getMenu().getItem(position).setChecked(true);
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {}
+});
+```
+BottomNavigationView在item数量大于3时默认带有滑动切换效果（ShiftingMode），且未提供代码层级的关闭选项，需要通过反射实现
+```Java
+/**
+ * 关闭BottomNavigationView的ShiftingMode效果
+ */
+private void disableNavigationShiftMode() {
+    menuView = (BottomNavigationMenuView)
+            mBottomNavigationView.getChildAt(0);
+
+    try {
+        // 使用反射
+        Field shiftingMode = menuView.getClass().getDeclaredField("mShiftingMode");
+        shiftingMode.setAccessible(true);
+        shiftingMode.setBoolean(menuView, false);
+        shiftingMode.setAccessible(false);
+
+        for (int i = 0; i < menuView.getChildCount(); i++) {
+            BottomNavigationItemView itemView = (BottomNavigationItemView)
+                    menuView.getChildAt(i);
+            itemView.setShiftingMode(false);
+            itemView.setChecked(itemView.getItemData().isChecked());
+        }
+
+    } catch (NoSuchFieldException e) {
+        e.printStackTrace();
+    } catch (IllegalAccessException e) {
+        e.printStackTrace();
+    }
+}
+```
+
+
+

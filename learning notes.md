@@ -1,3 +1,12 @@
+# Android Learning Notes
+* [Retrofit结合RxJava](#retrofit结合rxjava)
+* [AsyncTask](#asynctask)
+* [调用系统相机](#调用系统相机)
+* [十六进制字符串与字节数组之间的转换](#十六进制字符串与字节数组之间的转换)
+* [Bluetooth Low Energy 低功耗蓝牙](#bluetooth-low-energy-低功耗蓝牙)
+* [BottomNavigationView 底部导航栏](#bottomnavigationview-底部导航栏)
+***
+
 ## Retrofit结合RxJava
 
 ```Java
@@ -615,6 +624,3 @@ private void disableNavigationShiftMode() {
     }
 }
 ```
-
-
-

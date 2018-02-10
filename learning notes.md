@@ -5,6 +5,7 @@
 * [十六进制字符串与字节数组之间的转换](#十六进制字符串与字节数组之间的转换)
 * [Bluetooth Low Energy 低功耗蓝牙](#bluetooth-low-energy-低功耗蓝牙)
 * [BottomNavigationView 底部导航栏](#bottomnavigationview-底部导航栏)
+* [SpannableString 文本效果](#spannablestring-文本效果)
 ***
 
 ## Retrofit结合RxJava
@@ -624,3 +625,84 @@ private void disableNavigationShiftMode() {
     }
 }
 ```
+
+
+## SpannableString 文本效果
+
+### 用法
+```Java
+SpannableString spannableString = new SpannableString("文本文字");
+spannableString.setSpan(Object what, int start, int end, int flags);
+textView.setText(spannableString);
+```
+* what　　设置的格式
+* start　　需要设置格式的字符串的起始下标
+* end　　需要设置格式的字符串的终止下标
+* flags
+	* Spanned.SPAN_INCLUSIVE_EXCLUSIVE　　包括起始下标，不包括终止下标
+	* Spanned.SPAN_INCLUSIVE_INCLUSIVE　　都包括
+	* Spanned.SPAN_EXCLUSIVE_EXCLUSIVE　　都不包括
+	* Spanned.SPAN_EXCLUSIVE_INCLUSIVE　　不包括起始下标，包括终止下标
+
+### Span常用的格式
+```Java
+// 设置前景色
+ForegroundColorSpan colorSpan = new ForegroundColorSpan(Color.parseColor("#0099EE"));
+
+// 设置背景色
+BackgroundColorSpan colorSpan = new BackgroundColorSpan(Color.parseColor("#AC00FF30"));
+
+// 设置文字相对大小
+RelativeSizeSpan sizeSpan = new RelativeSizeSpan(1.8f);
+
+// 设置删除线
+StrikethroughSpan strikethroughSpan = new StrikethroughSpan();
+
+// 设置下划线
+UnderlineSpan underlineSpan = new UnderlineSpan();
+
+// 设置上标
+SuperscriptSpan superscriptSpan = new SuperscriptSpan();
+
+// 设置下标
+SubscriptSpan subscriptSpan = new SubscriptSpan();
+
+// 粗体
+StyleSpan styleSpan_B  = new StyleSpan(Typeface.BOLD);
+// 斜体
+StyleSpan styleSpan_I  = new StyleSpan(Typeface.ITALIC);
+
+// 设置图片
+ImageSpan imageSpan = new ImageSpan(drawable);
+
+// 设置超链接文本
+URLSpan urlSpan = new URLSpan("http://www.baidu.com");
+
+// 设置可点击的文本
+MyClickableSpan clickableSpan = new MyClickableSpan("要传递的内容");
+class MyClickableSpan extends ClickableSpan {
+
+    private String content;
+
+    public MyClickableSpan(String content) {
+        this.content = content;
+    }
+
+    @Override
+    public void updateDrawState(TextPaint ds) {
+        ds.setUnderlineText(false);
+    }
+
+    @Override
+    public void onClick(View widget) {
+        Intent intent = new Intent(MainActivity.this, OtherActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putString("content", content);
+        intent.putExtra("bundle", bundle);
+        startActivity(intent);
+    }
+}
+```
+
+
+

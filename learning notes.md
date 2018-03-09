@@ -6,6 +6,7 @@
 * [Bluetooth Low Energy 低功耗蓝牙](#bluetooth-low-energy-低功耗蓝牙)
 * [BottomNavigationView 底部导航栏](#bottomnavigationview-底部导航栏)
 * [SpannableString 文本效果](#spannablestring-文本效果)
+* [SurfaceView的基本用法](#surfaceview的基本用法)
 ***
 
 ## Retrofit结合RxJava
@@ -704,5 +705,114 @@ class MyClickableSpan extends ClickableSpan {
 }
 ```
 
+
+## SurfaceView的基本用法
+
+```java
+public class MySurfaceView extends SurfaceView implements SurfaceHolder.Callback, Runnable {
+
+    private SurfaceHolder mHolder;
+
+    /**
+     * 与SurfaceHolder绑定的用于绘图的Canvas
+     */
+    private Canvas mCanvas;
+
+    /**
+     * 用于绘制的线程
+     */
+    private Thread mThread;
+
+    /**
+     * 子线程的标志位
+     */
+    private boolean mIsDrawing;
+    
+    private Paint mPaint;
+    
+    public MySurfaceView(Context context) {
+        super(context);
+        initView();
+    }
+
+    public MySurfaceView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        initView();
+    }
+
+    public MySurfaceView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        initView();
+    }
+    
+    private void initView() {  
+        // 初始化SurfaceHolder，注册回调
+        mHolder = getHolder();
+        mHolder.addCallback(this);
+
+        // 设置可获得焦点
+        setFocusable(true);
+        setFocusableInTouchMode(true);
+
+        // 设置常亮
+        this.setKeepScreenOn(true);
+    }
+    
+    @Override
+    public void surfaceCreated(SurfaceHolder surfaceHolder) {
+        mIsDrawing = true;
+        
+        mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+        // FILL_AND_STROKE 填充内容和轮廓
+        mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        // 画笔颜色
+        mPaint.setColor(Color.BLACK);
+        // 轮廓宽度
+        mPaint.setStrokeWidth(4);
+
+        mThread = new Thread(this);
+        mThread.start();
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder surfaceHolder, int format, int width, int height) {}
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+        mIsDrawing = false;
+    }
+    
+    @Override
+    public void run() {
+        while (mIsDrawing) {
+            draw();
+        ｝
+    ｝
+    
+    private void draw() {
+        try {
+            // 获得Canvas
+            mCanvas = mHolder.lockCanvas();
+            
+            // TODO draw something
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (mCanvas != null) {
+                //对画布内容进行提交
+                mHolder.unlockCanvasAndPost(mCanvas);
+            }
+        }
+    }
+}
+```
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 
 

@@ -503,6 +503,10 @@ public void close() {
 
 ## BottomNavigationView 底部导航栏
 BottomNavigationView为谷歌官方导航控件，可结合ViewPager实现底部导航功能
+```
+Gradle:
+com.android.support:design:版本号
+```
 ```xml
 <android.support.design.widget.BottomNavigationView
     android:id="@+id/bottom_navigation_view"

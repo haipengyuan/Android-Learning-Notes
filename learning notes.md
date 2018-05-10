@@ -7,6 +7,7 @@
 * [BottomNavigationView 底部导航栏](#bottomnavigationview-底部导航栏)
 * [SpannableString 文本效果](#spannablestring-文本效果)
 * [SurfaceView的基本用法](#surfaceview的基本用法)
+* [ActionBarDrawerToggle打开关闭DrawerLayout](#actionbardrawertoggle打开关闭drawerlayout)
 ***
 
 ## Retrofit结合RxJava
@@ -813,6 +814,19 @@ public class MySurfaceView extends SurfaceView implements SurfaceHolder.Callback
 ```
  
  
+## ActionBarDrawerToggle打开关闭DrawerLayout
+
+点击ToolBar左侧按钮打开DrawerLayout，再次点击关闭DrawerLayout，打开和关闭时的按钮图标样式可实现变换
+```java
+ActionBar actionBar = getSupportActionBar();
+actionBar.setDisplayHomeAsUpEnabled(true);
+
+ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(
+        this, mDrawerLayout, mToolbar,
+        R.string.drawer_open, R.string.drawer_close);
+mDrawerToggle.syncState();
+mDrawerLayout.addDrawerListener(mDrawerToggle);
+```
  
  
  

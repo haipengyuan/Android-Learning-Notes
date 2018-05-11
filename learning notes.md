@@ -60,6 +60,20 @@ observable.subscribeOn(Schedulers.io())  // 在IO线程请求网络
         }
     });
 ```
+```
+// RxJava2
+implementation "io.reactivex.rxjava2:rxjava:2.1.13"
+implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
+
+// Retrofit
+implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+
+// 衔接 Retrofit & RxJava
+implementation 'com.jakewharton.retrofit:retrofit2-rxjava2-adapter:1.0.0'
+
+// Gson解析
+implementation 'com.google.code.gson:gson:2.8.4'
+```
 
 
 ## AsyncTask

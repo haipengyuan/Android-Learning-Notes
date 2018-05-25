@@ -9,3 +9,4 @@
 * [SpannableString 文本效果](learning%20notes.md#spannablestring-文本效果)
 * [SurfaceView的基本用法](learning%20notes.md#surfaceview的基本用法)
 * [ActionBarDrawerToggle打开关闭DrawerLayout](learning%20notes.md#actionbardrawertoggle打开关闭drawerlayout)
+* [ImageView的scaleType属性](learning%20notes.md#imageview的scaletype属性)
